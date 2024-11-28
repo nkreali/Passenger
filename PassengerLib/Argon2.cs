@@ -5,7 +5,7 @@ namespace PassengerLib
 {
     public static class Argon2
     {
-        public static Argon2id s_argon2;
+        public static Argon2id? s_argon2;
 
         public static byte[] Argon2HashPassword(string password)
         {

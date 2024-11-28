@@ -46,7 +46,7 @@ namespace PassengerLib
             }
             catch (Exception e)
             {
-                return "Error encrypting: " + e.Message;
+                return "Ошибка шифрования: " + e.Message;
             }
         }
 
@@ -60,17 +60,17 @@ namespace PassengerLib
                 var base64Decoded = Convert.FromBase64String(plainText);
                 var base64DecodedStr = encoding.GetString(base64Decoded);
                 var payload = JsonSerializer.Deserialize<Dictionary<string, string>>(base64DecodedStr);
-                aes.IV = Convert.FromBase64String(payload["iv"]);
+                aes.IV = Convert.FromBase64String(payload!["iv"]);
                 var AESDecrypt = aes.CreateDecryptor(aes.Key, aes.IV);
                 var buffer = Convert.FromBase64String(payload["value"]);
 
-                Argon2.s_argon2.Reset();
+                Argon2.s_argon2!.Reset();
                 Argon2.s_argon2.Dispose();
                 return encoding.GetString(AESDecrypt.TransformFinalBlock(buffer, 0, buffer.Length));
             }
             catch (Exception e)
             {
-                return "Error decrypting: " + e.Message;
+                return "Ошибка дешифрования: " + e.Message;
             }
         }
 
