@@ -4,6 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using System.Buffers;
+using System.Security;
 
 namespace PassengerLib
 {
@@ -56,6 +57,21 @@ namespace PassengerLib
         private static bool CheckDigits(string input)
         {
             return input.AsSpan().IndexOfAny(s_Digits) > -1;
+        }
+
+        public static string ConvertSecureStringToString(SecureString data)
+        {
+            return new System.Net.NetworkCredential(string.Empty, data).Password;
+        }
+
+        public static SecureString StringToSecureString(string data)
+        {
+            var secureString = new SecureString();
+            foreach (var c in data)
+            {
+                secureString.AppendChar(c);
+            }
+            return secureString;
         }
     }
 }

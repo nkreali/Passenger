@@ -46,7 +46,7 @@ namespace PassengerLib
             }
             catch (Exception e)
             {
-                return "Ошибка шифрования: " + e.Message;
+                return "Error encrypting: " + e.Message;
             }
         }
 
@@ -70,7 +70,7 @@ namespace PassengerLib
             }
             catch (Exception e)
             {
-                return "Ошибка дешифрования: " + e.Message;
+                return "Error decrypting: " + e.Message;
             }
         }
 

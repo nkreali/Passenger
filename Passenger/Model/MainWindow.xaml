@@ -10,11 +10,222 @@
 
         Title="Passenger - Password Manager"
         Height="700" Width="1200" ResizeMode="CanMinimize" WindowStartupLocation="CenterScreen" 
-        Visibility="Visible" MouseDown="Window_MouseDown" AllowsTransparency="True"  
-        Background="Transparent" WindowStyle="None" Closing="Passenger_Closing">
-        <!-- Icon="pack://application:,,,/Resources/Logo.ico"-->
-    
-    <Grid>
-        
-    </Grid>
+        Visibility="Visible" MouseDown="Passenger_MouseDown" 
+        Background="Transparent" WindowStyle="None">
+    <!-- Icon="pack://application:,,,/Resources/Logo.ico"-->
+    <Border BorderThickness="1,1,1,1" Background="White" BorderBrush="#690fc2">
+        <Grid RenderTransformOrigin="0.819,0.497" Margin="0,0,0,0" Background="#f3f5f2">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition/>
+                <ColumnDefinition Width="0*"/>
+            </Grid.ColumnDefinitions>
+
+            <TabControl Background="#f3f5f2" Name="tabControl" HorizontalAlignment="Left" Height="699" Margin="240,0,0,0" VerticalAlignment="Center" Width="959" Grid.ColumnSpan="2">
+                <TabItem Name="UsersTab" Header="UsersTab">
+                    <Grid Background="#f3f5f2">
+
+                        <Line X1="40" Y1="70" X2="930" Y2="70" Stroke="Red" StrokeThickness="1"/>
+                        <Label Content="Users List" HorizontalAlignment="Left" Margin="36,46,0,0" VerticalAlignment="Top" Foreground="#0d0300" FontSize="14" FontWeight="Bold"/>
+                        <ListView Name="usersList" HorizontalAlignment="Center" ScrollViewer.HorizontalScrollBarVisibility="Disabled" Height="490" Margin="0,81,0,0" VerticalAlignment="Top" Width="860" 
+                                  Background="#f3f5f2" Foreground="#0d0300" FontSize="14" PreviewMouseDoubleClick="usersList_PreviewMouseDoubleClick" KeyDown="usersList_KeyDown" SelectionMode="Single">
+                            <ListView.ItemContainerStyle>
+                                <Style TargetType="{x:Type ListViewItem}">
+                                    <Setter Property="Template">
+                                        <Setter.Value>
+                                            <ControlTemplate TargetType="{x:Type ListViewItem}">
+                                                <Border x:Name="Bd" BorderBrush="{TemplateBinding BorderBrush}" 
+                                                                    BorderThickness="{TemplateBinding BorderThickness}" 
+                                                                    Background="{TemplateBinding Background}" 
+                                                                    Padding="{TemplateBinding Padding}"
+                                                                    SnapsToDevicePixels="true">
+                                                    <GridViewRowPresenter HorizontalAlignment="{TemplateBinding HorizontalContentAlignment}" 
+                                                                          SnapsToDevicePixels="{TemplateBinding SnapsToDevicePixels}"
+                                                                          VerticalAlignment="{TemplateBinding VerticalContentAlignment}"/>
+                                                </Border>
+                                            </ControlTemplate>
+                                        </Setter.Value>
+                                    </Setter>
+                                    <Style.Triggers>
+                                        <Trigger Property="IsSelected" Value="true">
+                                            <Setter Property="Background" Value="#B5A2FF"/>
+                                            <Setter Property="Foreground" Value="Black"/>
+                                        </Trigger>
+                                    </Style.Triggers>
+                                </Style>
+                            </ListView.ItemContainerStyle>
+                            <ListView.View>
+                                <GridView>
+                                    <GridViewColumn Header="Name" Width="430" DisplayMemberBinding="{Binding Name}"/>
+                                    <GridViewColumn Header="Creation Date" Width="430" DisplayMemberBinding="{Binding CreateDate}"/>
+                                </GridView>
+                            </ListView.View>
+                            <ListView.ContextMenu>
+                                <ContextMenu HasDropShadow="False" StaysOpen="True" >
+                                    <MenuItem Header="Change Master Password" Click="ChangeMasterPassword_Click" Foreground="Black" Tag="2" >
+                                        <MenuItem.Icon>
+                                            <materialDesign:PackIcon Name="change" Kind="PasswordAdd"/>
+                                        </MenuItem.Icon>
+                                    </MenuItem>
+                                    <MenuItem Header="Delete/Remove" Click="Delete_Click" Foreground="Red" Tag="2" >
+                                        <MenuItem.Icon>
+                                            <materialDesign:PackIcon Name="delete" Kind="Delete"/>
+                                        </MenuItem.Icon>
+                                    </MenuItem>
+                                </ContextMenu>
+                            </ListView.ContextMenu>
+                        </ListView>
+                        <materialDesign:PackIcon Name="AddIcon" ToolTip="Add User" Foreground="DarkSlateBlue" Kind="Plus" Margin="60,579,0,0" Width="25" Height="26" RenderTransformOrigin="0.556,-0.722" FontWeight="Bold" PreviewMouseDown="AddIcon_PreviewMouseDown" />
+                        <materialDesign:PackIcon x:Name="DeleteIcon" ToolTip="Delete/Remove User" Foreground="DarkSlateBlue" Kind="Minus" Margin="99,579,0,0" Width="25" Height="26" RenderTransformOrigin="0.556,-0.722" PreviewMouseDown="DeleteIcon_PreviewMouseDown" />
+
+                    </Grid>
+
+                </TabItem>
+
+                <TabItem Name="AccountsTab" Header="AccsTab">
+                    <Grid Background="#f3f5f2" Margin="14,0,-13,0">
+
+                        <Line X1="40" Y1="70" X2="930" Y2="70" Stroke="Red" StrokeThickness="1"/>
+                        <Label Content="Accounts List for: " HorizontalAlignment="Left" Margin="36,46,0,0" VerticalAlignment="Top" Foreground="#0d0300" FontSize="14" FontWeight="Bold"/>
+                        <TextBlock Name="AccListUserLVL"  Text="User" HorizontalAlignment="Left" Margin="165,51,0,0" VerticalAlignment="Top" Foreground="Green" FontSize="14" FontWeight="Bold"/>
+                        <Button Name="LogoutLBL" BorderThickness="0" Style="{DynamicResource LogoutButton}" Content="Logout" Background="#f3f5f2" HorizontalAlignment="Left" Margin="411,628,0,0" VerticalAlignment="Top" FontSize="16" RenderTransformOrigin="4.157,15.948" FontWeight="Bold" Click="LogoutLBL_Click" Width="80" Height="26"/>
+                        <materialDesign:PackIcon Kind="Logout" Name="logoutIconV" Margin="384,626,0,0" Width="31" Height="30" Foreground="Red" RenderTransformOrigin="1.547,0.52"/>
+                        <materialDesign:PackIcon Name="AddAppIcon" ToolTip="Add Application" Foreground="#690fc2" Kind="Plus" Margin="48,588,0,0" Width="25" Height="26" RenderTransformOrigin="0.556,-0.722" FontWeight="Bold" PreviewMouseDown="AddAppIcon_PreviewMouseDown"/>
+                        <materialDesign:PackIcon x:Name="DelApp" ToolTip="Delete Application" Foreground="#690fc2" Kind="Minus" Margin="78,588,0,0" Width="25" Height="26" RenderTransformOrigin="0.556,-0.722" PreviewMouseDown="DelAppIcon_PreviewMouseDown"/>
+                        <ListView Name="accList"  GridViewColumnHeader.Click="AppListColumnHeaderClickedHandler" HorizontalAlignment="Left" ScrollViewer.HorizontalScrollBarVisibility="Disabled" Height="508" VerticalAlignment="Top" Width="885" Background="#f3f5f2" Foreground="#0d0300" FontSize="14" SelectionMode="Single" SelectionChanged="accList_SelectionChanged" Margin="36,80,0,0">
+                            <ListView.ItemContainerStyle>
+                                <Style TargetType="{x:Type ListViewItem}">
+                                    <Setter Property="Template">
+                                        <Setter.Value>
+                                            <ControlTemplate TargetType="{x:Type ListViewItem}">
+                                                <Border x:Name="Bd" 
+                                                        BorderBrush="{TemplateBinding BorderBrush}" 
+                                                        BorderThickness="{TemplateBinding BorderThickness}" 
+                                                        Background="{TemplateBinding Background}" 
+                                                        Padding="{TemplateBinding Padding}"
+                                                        SnapsToDevicePixels="true">
+                                                    <GridViewRowPresenter HorizontalAlignment="{TemplateBinding HorizontalContentAlignment}" 
+                                                                          SnapsToDevicePixels="{TemplateBinding SnapsToDevicePixels}"
+                                                                          VerticalAlignment="{TemplateBinding VerticalContentAlignment}"/>
+                                                </Border>
+                                            </ControlTemplate>
+                                        </Setter.Value>
+                                    </Setter>
+                                    <Style.Triggers>
+                                        <Trigger Property="IsSelected" Value="true">
+                                            <Setter Property="Background" Value="#B5A2FF"/>
+                                            <Setter Property="Foreground" Value="Black"/>
+                                        </Trigger>
+                                    </Style.Triggers>
+                                </Style>
+                            </ListView.ItemContainerStyle>
+                            <ListView.View>
+                                <GridView>
+                                    <GridViewColumn Header="Service" Width="177" DisplayMemberBinding="{Binding Service}"/>
+                                    <GridViewColumn Header="Login" Width="177" DisplayMemberBinding="{Binding Login}"/>
+                                    <GridViewColumn Header="Password" Width="177" DisplayMemberBinding="{Binding Password}"/>
+                                    <GridViewColumn Header="Date Created" Width="177" DisplayMemberBinding="{Binding DateCreated}"/>
+                                    <GridViewColumn Header="Date Modified" Width="177" DisplayMemberBinding="{Binding DateModified}"/>
+                                </GridView>
+                            </ListView.View>
+                            <ListView.ContextMenu>
+                                <ContextMenu HasDropShadow="False" StaysOpen="True" >
+                                    <MenuItem Header="Copy to clipboard (15 seconds available)" Click="CopyToClipboard_Click" Tag="1" >
+                                        <MenuItem.Icon>
+                                            <materialDesign:PackIcon Name="copy" Kind="ContentCopy"/>
+                                        </MenuItem.Icon>
+                                    </MenuItem>
+                                    <MenuItem Header="Show Password" Click="ShowPassword_Click" Tag="2" >
+                                        <MenuItem.Icon>
+                                            <materialDesign:PackIcon Name="show" Kind="Show"/>
+                                        </MenuItem.Icon>
+                                    </MenuItem>
+                                    <MenuItem Header="Update Account Password" Click="UpdateAccountPass_Click" Tag="2" >
+                                        <MenuItem.Icon>
+                                            <materialDesign:PackIcon Name="update" Kind="PasswordAdd"/>
+                                        </MenuItem.Icon>
+                                    </MenuItem>
+                                    <MenuItem Header="Delete Account" Click="DeleteAccount_Click" Foreground="Red" Tag="2" >
+                                        <MenuItem.Icon>
+                                            <materialDesign:PackIcon Name="del" Kind="Delete"/>
+                                        </MenuItem.Icon>
+                                    </MenuItem>
+                                </ContextMenu>
+                            </ListView.ContextMenu>
+                        </ListView>
+
+                    </Grid>
+
+                </TabItem>
+
+                <TabItem Name="SettingsTab" Header="appTab">
+                    <Grid Background="#f3f5f2">
+
+                    </Grid>
+                </TabItem>
+
+
+
+            </TabControl>
+
+            <Grid VerticalAlignment="Top" Height="50" Background="#f3f5f2" >
+                <Border BorderThickness="0 0 0.4 0" BorderBrush="#690fc2"/>
+                <TextBlock Text="Passenger - The Password Manager"  TextAlignment="Center" HorizontalAlignment="Center" Foreground="Black" FontSize="18" Margin="450,13,220,7" Width="337"/>
+                <StackPanel VerticalAlignment="Center">
+                    <materialDesign:PopupBox Foreground="Black" HorizontalAlignment="Right"  Margin="0,9,7,9" PlacementMode="BottomAndAlignRightEdges" StaysOpen="False" Width="26">
+                        <Border BorderBrush="#690fc2" BorderThickness="1">
+                            <StackPanel Width="150" Background="#f3f5f2">
+                                <Button Content="About" VerticalContentAlignment="Center" FontSize="18" Click="AboutBTN_Click"/>
+                                <Separator/>
+                                <Button Content="Exit" VerticalContentAlignment="Center" FontSize="18" Click="CloseBTN_Click"/>
+                            </StackPanel>
+                        </Border>
+                    </materialDesign:PopupBox>
+                </StackPanel>
+                <Label x:Name="miniMizeLBL" Content="_" PreviewMouseDown="MinimizeLBL_PreviewMouseDown" FontSize="25" Foreground="Black" HorizontalAlignment="Left" Margin="1139,-3,0,0" VerticalAlignment="Top"/>
+            </Grid>
+
+
+            <Grid x:Name="GridMenu" HorizontalAlignment="Left"  Width="240">
+                <Grid.Background>
+                    <LinearGradientBrush StartPoint="0,0" EndPoint="1,1">
+                        <GradientStop Color="SlateBlue" Offset="0.0" />
+                        <GradientStop Color="DarkSlateBlue" Offset="0.6" />
+                    </LinearGradientBrush>
+                </Grid.Background>
+
+                <Line X1="20" Y1="72" X2="220" Y2="72" Stroke="#f3f5f2" StrokeThickness="1"/>
+
+
+                <TextBlock Name="vaultExpireTb" Visibility="Hidden" Text="Vault Expire" Foreground="#f3f5f2" Background="Transparent" HorizontalAlignment="Center" Margin="30,593,12,0" VerticalAlignment="Top" Height="66" Width="179"/>
+                <materialDesign:PackIcon Name="vaultElapsed" Visibility="Hidden" Foreground="Orange" Kind="Warning" Margin="9,593,0,92" Width="18" Height="18" VerticalAlignment="Center"/>
+                <TextBlock Text=" user" Name="userTXB" HorizontalAlignment="Center" Foreground="#f3f5f2" FontSize="15" Margin="8,50,10,626" Width="203"></TextBlock>
+
+                <ListViewItem Name="UsersListVI" ToolTip="Users" Height="39" Foreground="#FFDCDCDC" FontSize="18" PreviewMouseDown="Users_PreviewMouseDown" Margin="0,127,0,537">
+                    <StackPanel Orientation="Horizontal" >
+                        <materialDesign:PackIcon Name="vaultIcon" Kind="ShieldAccount" Margin="9" Width="18" Height="18" VerticalAlignment="Center"/>
+                        <TextBlock Name="userTXT" Text="Users" VerticalAlignment="Center"/>
+                    </StackPanel>
+                </ListViewItem>
+
+                <ListViewItem  Name="AccListVI" ToolTip="Accounts" Height="39" Foreground="Red" FontSize="18" PreviewMouseDown="Acc_PreviewMouseDown" Margin="0,166,0,498" IsEnabled="False">
+                    <StackPanel Orientation="Horizontal" >
+                        <materialDesign:PackIcon Name="appIcon" Kind="Accounts" Margin="9" Width="18" Height="18" VerticalAlignment="Center"/>
+                        <TextBlock x:Name="accTXT" Text="Accounts" VerticalAlignment="Center"/>
+                    </StackPanel>
+                </ListViewItem>
+
+                <ListViewItem Name="SettingsListVI" ToolTip="Settings" Height="39" Foreground="#FFDCDCDC" FontSize="18" PreviewMouseDown="Settings_PreviewMouseDown" Margin="0,205,0,459">
+                    <StackPanel Orientation="Horizontal" >
+                        <materialDesign:PackIcon Name="settingIcon" Kind="Settings" Margin="9" Width="18" Height="18" VerticalAlignment="Center"/>
+                        <TextBlock Name="settingsTXT" Text="Settings" VerticalAlignment="Center"/>
+                    </StackPanel>
+                </ListViewItem>
+
+                <Label Name="versionLabel" Content="v1.0" HorizontalAlignment="Left" Foreground="#FFDCDCDC" FontSize="12" Margin="0,670,0,0"  VerticalAlignment="Top" Width="40"/>
+            </Grid>
+        </Grid>
+
+
+
+    </Border>
 </Window>
