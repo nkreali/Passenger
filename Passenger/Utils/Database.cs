@@ -11,6 +11,7 @@ using System.Windows.Controls;
 using System.DirectoryServices.ActiveDirectory;
 using System.Xml.Linq;
 using System.Security.Policy;
+using System.Security.Principal;
 
 namespace Passenger.Utils
 {
@@ -274,8 +275,9 @@ namespace Passenger.Utils
             return accounts;
         }
 
-        public static void AddAccount(int ownerId, Account account) 
+        public static void AddAccount(int ownerId, Account account)
         {
+            account.IsPasswordVisible = true;
             try
             {
                 using (var connection = new SQLiteConnection($"Data source ={DefaultPath}"))
@@ -299,6 +301,7 @@ namespace Passenger.Utils
             {
                 Notification.ShowNotificationInfo("red", ex.Message);
             }
+            account.IsPasswordVisible = false;
         }
         public static bool AccountExists(int ownerId, Account account)
         {
@@ -330,7 +333,81 @@ namespace Passenger.Utils
             return false;
         }
 
-        public static void DeleteAccount() { }
+        public static void DeleteAccount(Account account)
+        {
+            try
+            {
+                using (var connection = new SQLiteConnection($"Data source ={DefaultPath}"))
+                {
+                    connection.Open();
+
+                    SQLiteCommand command = new SQLiteCommand(connection);
+                    command.CommandText = "DELETE FROM Accounts WHERE Id = @Id)";
+                    command.Parameters.AddWithValue("@Id", account.Id);
+
+                    command.ExecuteNonQuery();
+                }
+            }
+            catch (Exception ex)
+            {
+                Notification.ShowNotificationInfo("red", ex.Message);
+            }
+        }
+        public static void UpdateAccount(Account account, string newPassword)
+        {
+            try
+            {
+                using (var connection = new SQLiteConnection($"Data source ={DefaultPath}"))
+                {
+                    connection.Open();
+
+                    SQLiteCommand command = new SQLiteCommand(connection);
+                    command.CommandText = "UPDATE Accounts " +
+                                          "SET Password = @NewPassword, " +
+                                          "DateModified = @NewDateModified " +
+                                          "WHERE Id = @Id";
+                    command.Parameters.AddWithValue("@NewPassword", newPassword);
+                    command.Parameters.AddWithValue("@NewDateModified", DateTime.Now);
+                    command.Parameters.AddWithValue("@Id", account.Id);
+
+                    command.ExecuteNonQuery();
+                }
+            }
+            catch (Exception ex)
+            {
+                Notification.ShowNotificationInfo("red", ex.Message);
+            }
+            account.Password = newPassword;
+        }
+
+        public static void UpdateUsersPassword(string name, SecureString newPassword)
+        {
+            try
+            {
+                using (var connection = new SQLiteConnection($"Data source ={DefaultPath}"))
+                {
+                    connection.Open();
+
+                    SQLiteCommand command = new SQLiteCommand(connection);
+
+
+                    var hash = Convert.ToBase64String(Argon2.Argon2HashPassword
+                               (PasswordValidator.ConvertSecureStringToString(newPassword)));
+
+                    command.CommandText = "UPDATE Users " +
+                                          "SET Password = @NewPassword " +
+                                          "WHERE Name = @Name"; 
+                    command.Parameters.AddWithValue("@NewPassword", hash);
+                    command.Parameters.AddWithValue("@Name", name);
+                    
+                    command.ExecuteNonQuery();
+                }
+            }
+            catch (Exception ex)
+            {
+                Notification.ShowNotificationInfo("red", ex.Message);
+            }
+        }
 
     }
 }

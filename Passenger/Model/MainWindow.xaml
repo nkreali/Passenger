@@ -56,7 +56,7 @@
                             <ListView.View>
                                 <GridView>
                                     <GridViewColumn Header="Name" Width="430" DisplayMemberBinding="{Binding Name}"/>
-                                    <GridViewColumn Header="Creation Date" Width="430" DisplayMemberBinding="{Binding CreateDate}"/>
+                                    <GridViewColumn Header="Creation Date" Width="430" DisplayMemberBinding="{Binding DateCreated}"/>
                                 </GridView>
                             </ListView.View>
                             <ListView.ContextMenu>
@@ -159,7 +159,21 @@
 
                 <TabItem Name="SettingsTab" Header="appTab">
                     <Grid Background="#f3f5f2">
-
+                        <Grid Background="#f3f5f2">
+                            <Line X1="25" Y1="50" X2="235" Y2="50" Stroke="Red" StrokeThickness="1"/>
+                            <Label Content="Vault Session Expire Period" HorizontalAlignment="Left" Margin="21,23,0,0" VerticalAlignment="Top" Foreground="#0d0300" FontSize="16" FontWeight="Bold"/>
+                            <Label Content="Expire after (minutes):" HorizontalAlignment="Left" Margin="17,49,0,0" VerticalAlignment="Top" Foreground="#0d0300" FontSize="16" Height="30"/>
+                            <TextBox Background="#f3f5f2" BorderThickness="0,0,0,1" BorderBrush="#8D0FC3" Foreground="Black" FontSize="14" VerticalContentAlignment="Center" adorners:Watermark.Text="" TextAlignment="Center" x:Name="expirePeriodTxT" HorizontalAlignment="Left" Height="23" Margin="177,56,0,0" TextWrapping="Wrap" VerticalAlignment="Top" Width="57">
+                                <adorners:Watermark.TextStyle>
+                                    <Style TargetType="{x:Type TextBlock}">
+                                        <Setter Property="Opacity" Value="0.5" />
+                                        <Setter Property="VerticalAlignment" Value="Center" />
+                                        <Setter Property="HorizontalAlignment" Value="Center" />
+                                    </Style>
+                                </adorners:Watermark.TextStyle>
+                            </TextBox>
+                            <Button Name="applyExpirePeriodBTN" Style="{DynamicResource RoundCorner2}" Content="Apply"  Margin="87,84,0,0"  Width="69" Height="31" Foreground="#FFE1DDEE" Click="applyExpirePeriodBTN_Click" IsEnabled="True" HorizontalAlignment="Left" VerticalAlignment="Top" IsDefault="True"/>
+                        </Grid>
                     </Grid>
                 </TabItem>
 
