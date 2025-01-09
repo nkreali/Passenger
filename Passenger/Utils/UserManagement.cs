@@ -134,12 +134,15 @@ namespace Passenger.Utils
 
             int id = Database.GetUserID(userName);
             List<Account> accounts = Database.GetAccountsList(id);
-            accounts[0].IsPasswordVisible = true;
-            if (AES.Decrypt(accounts[0].Password!, oldMasterPassword).Contains("Error decrypting"))
+            if (accounts.Count() != 0)
             {
-                Notification.ShowNotificationInfo("red", "Incorrect master password!");
-                return;
-            }
+                accounts[0].IsPasswordVisible = true;
+                if (AES.Decrypt(accounts[0].Password!, oldMasterPassword).Contains("Error decrypting"))
+                {
+                    Notification.ShowNotificationInfo("red", "Incorrect master password!");
+                    return;
+                }
+            }            
             foreach (var account in accounts)
             {
                 account.IsPasswordVisible = true;
