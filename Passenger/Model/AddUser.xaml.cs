@@ -1,6 +1,4 @@
-﻿using System;
-using System.Runtime.Versioning;
-using System.Windows;
+﻿using System.Windows;
 using System.Windows.Input;
 using System.Windows.Threading;
 using Passenger.Utils;

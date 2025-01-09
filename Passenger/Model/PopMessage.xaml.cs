@@ -1,14 +1,9 @@
-﻿using Microsoft.Win32;
-using System.Runtime.Versioning;
-using System.Windows;
+﻿using System.Windows;
 using System.Windows.Media;
 using PassengerLib;
 
-namespace Passenger.Model
+namespace Passenger
 {
-    /// <summary>
-    /// Логика взаимодействия для PopMessage.xaml
-    /// </summary>
     public partial class PopMessage : Window
     {
         public PopMessage()

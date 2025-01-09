@@ -1,17 +1,7 @@
 ﻿using PassengerLib;
-using System;
 using System.IO;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using System.Data.SQLite;
 using System.Security;
-using System.Windows.Controls;
-using System.DirectoryServices.ActiveDirectory;
-using System.Xml.Linq;
-using System.Security.Policy;
-using System.Security.Principal;
 
 namespace Passenger.Utils
 {

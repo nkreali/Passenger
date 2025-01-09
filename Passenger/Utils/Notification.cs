@@ -1,6 +1,4 @@
-﻿using System.Runtime.Versioning;
-using PassengerLib;
-using Passenger.Model;
+﻿using PassengerLib;
 
 namespace Passenger.Utils
 {

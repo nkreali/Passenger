@@ -1,7 +1,4 @@
-﻿using Passenger.Utils;
-using System;
-using System.Runtime.Versioning;
-using System.Windows.Controls;
+﻿using System.Windows.Controls;
 
 namespace Passenger.Utils
 {
