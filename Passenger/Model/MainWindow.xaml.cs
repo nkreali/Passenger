@@ -143,7 +143,7 @@ namespace Passenger
 
                         AccListUserLVL.Text = userName;
                         Globals.vaultOpen = true;
-                        StartTimerVaultClose();
+                        StartTimerUserLogout();
                         Sort("Application", accList, ListSortDirection.Ascending);
                     }
                 }
@@ -315,7 +315,7 @@ namespace Passenger
             }
         }
 
-        private void StartTimerVaultClose()
+        private void StartTimerUserLogout()
         {
             _CloseSession = Globals.sessionExpireInterval * 60;
 
@@ -359,7 +359,7 @@ namespace Passenger
         private void RestartTimerUserLogout()
         {
             UserLogoutTimersStop();
-            StartTimerVaultClose();
+            StartTimerUserLogout();
         }
         private void UserLogoutTimer(object sender, EventArgs e)
         {

@@ -73,7 +73,7 @@ namespace Passenger
             {
                 vaultNameTXT.Text = vaultNameTXT.Text.Substring(0, vaultNameTXT.Text.Length - 1);
                 vaultNameTXT.CaretIndex = vaultNameTXT.Text.Length;
-                vaultLimitLbl.Content = "Vault name limit is 24 characters!";
+                vaultLimitLbl.Content = "User name limit is 24 characters!";
                 StartHashLabelClean();
             }
         }

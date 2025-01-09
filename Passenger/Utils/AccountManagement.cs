@@ -88,17 +88,6 @@ namespace Passenger.Utils
                 return;
             }
 
-            var test_acc = Database.GetAccountsList(account.Owner_Id)[0];
-            test_acc.IsPasswordVisible = true;
-            test_acc.Password = AES.Decrypt(test_acc.Password!, PasswordValidator.ConvertSecureStringToString(masterPassword));
-            if (test_acc.Password.Contains("Error decrypting"))
-            {
-                Notification.ShowNotificationInfo("red", "Incorrect master password!");
-                PassengerLib.Globals.masterPasswordCheck = false;
-                MasterPasswordTimerStart.MasterPasswordCheck_TimerStop(MainWindow.s_masterPassCheckTimer!);
-                return;
-            }
-
             account.IsPasswordVisible = true;
             account.Password = AES.Encrypt(account.Password, PasswordValidator.ConvertSecureStringToString(masterPassword));
             if (Database.isUserExists(userName))
