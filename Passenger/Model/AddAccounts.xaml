@@ -11,11 +11,11 @@
     <Border BorderBrush="DarkSlateBlue" BorderThickness="1">
         <Grid Background="#f3f5f2" Margin="0,0,0,3" >
             <Grid VerticalAlignment="Top" Height="39" Background="DarkSlateBlue" >
-                <TextBlock Text="Add Applications" Name="titleTxt" TextAlignment="Center" HorizontalAlignment="Center" Foreground="#f3f5f2" FontSize="18" Margin="30,6,22,4" Width="181" RenderTransformOrigin="0.5,0.5"/>
+                <TextBlock Text="Add Accounts" Name="titleTxt" TextAlignment="Center" HorizontalAlignment="Center" Foreground="#f3f5f2" FontSize="18" Margin="30,6,22,4" Width="181" RenderTransformOrigin="0.5,0.5"/>
                 <materialDesign:PackIcon Name="vaultIcon" Foreground="#f3f5f2" PreviewMouseDown="closeLBL_PreviewMouseDown" Kind="Close" Margin="248,0,0,0" Width="28" Height="23" VerticalAlignment="Center"/>
                 <Label Content="  " ToolTip="Close" HorizontalAlignment="Left" Margin="250,0,0,0" VerticalAlignment="Center" Foreground="#0d0300" FontSize="14" FontWeight="Bold" Height="21" PreviewMouseDown="closeLBL_PreviewMouseDown" Width="22" />
             </Grid>
-            <TextBox Background="#f3f5f2" BorderThickness="0,0,0,1" BorderBrush="DarkSlateBlue" Foreground="Black" FontSize="16" VerticalContentAlignment="Center" adorners:Watermark.Text="Application Name" TextAlignment="Center" x:Name="appNameTXT" HorizontalAlignment="Center" Height="30" Margin="0,50,0,0" TextWrapping="Wrap" VerticalAlignment="Top" Width="176" TextChanged="appNameTXT_TextChanged" TextBlock.FontSize="18">
+            <TextBox Background="#f3f5f2" BorderThickness="0,0,0,1" BorderBrush="DarkSlateBlue" Foreground="Black" FontSize="16" VerticalContentAlignment="Center" adorners:Watermark.Text="Service Name" TextAlignment="Center" x:Name="appNameTXT" HorizontalAlignment="Center" Height="30" Margin="0,50,0,0" TextWrapping="Wrap" VerticalAlignment="Top" Width="176" TextChanged="appNameTXT_TextChanged" TextBlock.FontSize="18">
                 <adorners:Watermark.TextStyle>
                     <Style TargetType="{x:Type TextBlock}">
                         <Setter Property="Opacity" Value="0.5" />

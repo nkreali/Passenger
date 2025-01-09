@@ -13,6 +13,7 @@ using Passenger.Utils;
 using System.ComponentModel;
 using System.Windows.Threading;
 using System.Collections.ObjectModel;
+using System.Text.RegularExpressions;
 
 namespace Passenger
 {
@@ -21,21 +22,25 @@ namespace Passenger
     /// </summary>
     public partial class MainWindow : Window
     {
-        DispatcherTimer? s_masterPassCheckTimer;
-        private static readonly string s_accountName = Environment.UserName; 
-        private DispatcherTimer _dispatcherTimer;
+        private static readonly string s_accountName = Environment.UserName;
         private string? _userName;
+        private DispatcherTimer? _dispatcherTimer;
+        private DispatcherTimer? _dispatcherTimerLogout;
+        private DispatcherTimer? _dispatcherTimerElapsed;
+        public static DispatcherTimer? s_masterPassCheckTimer;
+        private int _CloseSession = 0;
         Mutex? MyMutex;
-        public ObservableCollection<User> _users;
-        //public ObservableCollection<Account> _accounts { get; set; }
-        //private ICollectionView _collectionView;
         public MainWindow()
         {
             Startup();
-            InitializeComponent();
+            InitializeComponent(); 
             Database.InitializeTables();
+            s_masterPassCheckTimer = new DispatcherTimer();
             UserManagement.ListUsers(usersList);
-            userTXB.Text = " " + s_accountName;
+            userTXB.Text = " " + s_accountName; 
+            ListViewSettings.SetListViewColor(UsersListVI, false);
+            ListViewSettings.SetListViewColorApp(AccListVI, true); 
+            UserSessionExpire.LoadExpireTime(Globals.registryPath, Globals.userExpireReg, "10", expirePeriodTxT);
         }
         private void Startup()
         {
@@ -47,11 +52,6 @@ namespace Passenger
             }
         }
 
-        /// <summary>
-        /// Drag window on mouse click left
-        /// </summary>
-        /// <param name="sender"></param>
-        /// <param name="e"></param>
         private void Passenger_MouseDown(object sender, MouseButtonEventArgs e)
         {
             if (e.ChangedButton == MouseButton.Left)
@@ -93,12 +93,6 @@ namespace Passenger
             dataView.SortDescriptions.Add(sd);
             dataView.Refresh();
         }
-
-        /// <summary>
-        /// Minimize button(label)
-        /// </summary>
-        /// <param name="sender"></param>
-        /// <param name="e"></param>
         private void MinimizeLBL_PreviewMouseDown(object sender, MouseButtonEventArgs e)
         {
             WindowState = WindowState.Minimized;
@@ -127,13 +121,8 @@ namespace Passenger
 
         private void LogoutLBL_Click(object sender, RoutedEventArgs e)
         {
-            UserManagement.Logout(UsersListVI, AccListVI, SettingsListVI, accList, tabControl, s_masterPassCheckTimer);
-            //VaultCloseTimersStop();
-        }
-
-        private void usersList_PreviewMouseDoubleClick(object sender, MouseButtonEventArgs e)
-        {
-            OpenUsersAccounts();
+            UserManagement.Logout(UsersListVI, AccListVI, SettingsListVI, accList, tabControl, s_masterPassCheckTimer!);
+            UserLogoutTimersStop();
         }
 
         private void OpenUsersAccounts()
@@ -141,11 +130,9 @@ namespace Passenger
             var converter = new BrushConverter();
             if (usersList.SelectedItem != null)
             {
-                //VaultCloseTimersStop();
-                //VaultManagement.VaultClose(vaultsListVI, appListVI, settingsListVI, appList, tabControl, s_masterPassCheckTimer);
-                //string item = usersList.SelectedItem.ToString()!;
-                //string userName = item.Split(',')[0].Replace("{ Name = ", "");
-
+                UserLogoutTimersStop();
+                UserManagement.Logout(UsersListVI, AccListVI, SettingsListVI, accList, tabControl, s_masterPassCheckTimer!);
+                
                 User? user = (User)usersList.SelectedItem;
                 string userName = user.Name!;
                 
@@ -164,9 +151,9 @@ namespace Passenger
                         _userName = userName;
 
                         AccListUserLVL.Text = userName;
-                        //StartTimerVaultClose();
+                        Globals.vaultOpen = true;
+                        StartTimerVaultClose();
                         Sort("Application", accList, ListSortDirection.Ascending);
-                        //AccountManagement.AddAccsToTempList(accList);
                     }
                 }
             }
@@ -175,6 +162,10 @@ namespace Passenger
                 AccListVI.Foreground = Brushes.Red;
                 AccListVI.IsEnabled = false;
             }
+        }
+        private void usersList_PreviewMouseDoubleClick(object sender, MouseButtonEventArgs e)
+        {
+            OpenUsersAccounts();
         }
 
         private void usersList_KeyDown(object sender, KeyEventArgs e)
@@ -189,13 +180,13 @@ namespace Passenger
         {
             if (usersList.SelectedIndex == -1)
             {
-                Notification.ShowNotificationInfo("orange", "You must select a vault for changeing Master Password!");
+                Notification.ShowNotificationInfo("orange", "You must select a user for changing Master Password!");
                 return;
             }
-            Globals.vaultName = UserManagement.GetUserNameFromListView(usersList);
+            Globals.userName = UserManagement.GetUserNameFromListView(usersList);
             if (Globals.vaultOpen)
             {
-                Notification.ShowNotificationInfo("orange", "You cannot change Master Password when a vault is open!");
+                Notification.ShowNotificationInfo("orange", "You cannot change Master Password when the user is active!");
                 return;
             }
             var mPasswordChanger = new MasterPasswordChange();
@@ -210,11 +201,11 @@ namespace Passenger
         {
             if (Globals.vaultOpen)
             {
-                Notification.ShowNotificationInfo("orange", "You cannot delete when a vault is open!");
+                Notification.ShowNotificationInfo("orange", "You cannot delete when the user is active!");
                 return;
             }
 
-            //VaultCloseTimersStop();
+            UserLogoutTimersStop();
             UserManagement.DeleteUserItem(usersList);
 
         }
@@ -223,47 +214,43 @@ namespace Passenger
         {
             if (Globals.vaultOpen)
             {
-                Notification.ShowNotificationInfo("orange", "You cannot delete when a vault is open!");
+                Notification.ShowNotificationInfo("orange", "You cannot delete when the user is active!");
                 return;
             }
 
-            //VaultCloseTimersStop();
+            UserLogoutTimersStop();
             UserManagement.DeleteUserItem(usersList);
         }
 
-        private void accList_SelectionChanged(object sender, SelectionChangedEventArgs e)
-        {
-
-        }
-
+        
         private void AddAppIcon_PreviewMouseDown(object sender, RoutedEventArgs e)
         {
-            //RestartTimerVaultClose();
+            RestartTimerUserLogout();
             AddAccounts addAccounts = new AddAccounts();
             addAccounts.ShowDialog();
             if (Globals.closeAppConfirmation == false)
             {
                 if (!Globals.masterPasswordCheck)
                 {
-                    var masterPassword = MasterPasswordLoad.LoadMasterPassword(_userName);
-                    AccountManagement.AddAccount(accList, _userName, Globals.applicationName!, 
+                    var masterPassword = MasterPasswordLoad.LoadMasterPassword(_userName!);
+                    AccountManagement.AddAccount(accList, _userName!, Globals.serviceName!, 
                                                  Globals.accountName!, Globals.accountPassword!, masterPassword);
-                   // AccountManagement.AddAccsToTempList(accList);
                     ClearVariables.VariablesClear();
                     return;
                 }
 
-                AccountManagement.AddAccount(accList, _userName, Globals.applicationName!, 
+                AccountManagement.AddAccount(accList, _userName!, Globals.serviceName!, 
                                              Globals.accountName!, Globals.accountPassword!, Globals.masterPassword!);
-                //AccountManagement.AddAccsToTempList(accList);
                 ClearVariables.VariablesClear();
             }
         }
-        private void DelAppIcon_PreviewMouseDown(object sender, RoutedEventArgs e)
+        private void DelAccIcon_PreviewMouseDown(object sender, RoutedEventArgs e)
         {
+            RestartTimerUserLogout();
+            AccountManagement.DeleteSelectedItem(accList, _userName!, usersList);
 
         }
-        private void AppListColumnHeaderClickedHandler(object sender, RoutedEventArgs e)
+        private void AccListColumnHeaderClickedHandler(object sender, RoutedEventArgs e)
         {
 
         }
@@ -271,12 +258,12 @@ namespace Passenger
         {
             ClipBoardUtil.ClearClipboard(Globals.accountPassword!);
             Globals.accountPassword = null;
-            _dispatcherTimer.Stop();
+            _dispatcherTimer!.Stop();
         }
 
         private void CopyToClipboard_Click(object sender, RoutedEventArgs e)
         {
-            //RestartTimerVaultClose();
+            RestartTimerUserLogout();
             if (accList.SelectedIndex == -1)
             {
                 Notification.ShowNotificationInfo("orange", "You must select a application account for Copy to Clipboard option!");
@@ -291,24 +278,119 @@ namespace Passenger
         }
         private void ShowPassword_Click(object sender, RoutedEventArgs e)
         {
-            //RestartTimerVaultClose();
+            RestartTimerUserLogout();
             AccountManagement.ShowPassword(accList);            
         }
         private void UpdateAccountPass_Click(object sender, RoutedEventArgs e)
         {
-
+            RestartTimerUserLogout();
+            if (accList.SelectedIndex == -1)
+            {
+                Notification.ShowNotificationInfo("orange", "You must select a application line for updateing account password!");
+                return;
+            }
+            AccountManagement.UpdateSelectedItemPassword(accList, _userName!);
         }
 
         private void DeleteAccount_Click(object sender, RoutedEventArgs e)
         {
-
+            RestartTimerUserLogout();
+            AccountManagement.DeleteSelectedItem(accList, _userName!, usersList);
         }
 
         private void applyExpirePeriodBTN_Click(object sender, RoutedEventArgs e)
         {
-
+            try
+            {
+                if (expirePeriodTxT.Text.Length > 0 && !expirePeriodTxT.Text.StartsWith("0"))
+                {
+                    Regex regexNumber = new Regex("[^0-9.-]+");
+                    if (!regexNumber.IsMatch(expirePeriodTxT.Text) && !expirePeriodTxT.Text.Contains("-"))
+                    {
+                        int expireTime = Int32.Parse(expirePeriodTxT.Text);
+                        RegistryManagement.RegKey_WriteSubkey(Globals.registryPath, Globals.userExpireReg, expirePeriodTxT.Text);
+                        Globals.sessionExpireInterval = expireTime;
+                        Notification.ShowNotificationInfo("green", $"User session expire time is set to {expirePeriodTxT.Text} minutes!");
+                        return;
+                    }
+                    Notification.ShowNotificationInfo("orange", "Numbers only are allowed!");
+                    return;
+                }
+                Notification.ShowNotificationInfo("orange", "You must type a vaule greather than 0 !");
+            }
+            catch (Exception ex)
+            {
+                Notification.ShowNotificationInfo("red", ex.Message);
+            }
         }
 
+        private void StartTimerVaultClose()
+        {
+            _CloseSession = Globals.sessionExpireInterval * 60;
 
+            _dispatcherTimerLogout = new DispatcherTimer();
+            _dispatcherTimerLogout.Tick += UserLogoutTimer!;
+            _dispatcherTimerLogout.Interval = new TimeSpan(0, Globals.sessionExpireInterval, 0);
+            _dispatcherTimerLogout.Start();
+
+            _dispatcherTimerElapsed = new DispatcherTimer();
+            _dispatcherTimerElapsed.Tick += DisplayElapsedTimeUserLogout!;
+            _dispatcherTimerElapsed.Interval = new TimeSpan(0, 0, 1);
+            _dispatcherTimerElapsed.Start();
+
+        }
+        private void UserLogoutTimersStop()
+        {
+            if (_dispatcherTimerLogout != null)
+            {
+                if (_dispatcherTimerLogout.IsEnabled)
+                    _dispatcherTimerLogout.Stop();
+                if (_dispatcherTimerElapsed!.IsEnabled)
+                    _dispatcherTimerElapsed.Stop();
+                vaultExpireTb.Visibility = Visibility.Hidden;
+                vaultElapsed.Visibility = Visibility.Hidden;
+                _CloseSession = Globals.sessionExpireInterval * 60;
+            }
+        }
+        private void DisplayElapsedTimeUserLogout(object sender, EventArgs e)
+        {
+            _CloseSession--;
+
+            if (_CloseSession < 60)
+            {
+                vaultExpireTb.Visibility = Visibility.Visible;
+                vaultElapsed.Visibility = Visibility.Visible;
+                vaultExpireTb.Text = $"Vault will close in less than a \r\n" +
+                    $"minute if no action is made on it!";
+                _CloseSession = Globals.sessionExpireInterval * 60;
+            }
+        }
+        private void RestartTimerUserLogout()
+        {
+            UserLogoutTimersStop();
+            StartTimerVaultClose();
+        }
+        private void UserLogoutTimer(object sender, EventArgs e)
+        {
+            string[] listOpenWindow = { "UpdateAccountWPF", "AddAccountsWPF", "MasterPasswordWPF", "DelAccountWPF" };
+            foreach (var window in listOpenWindow)
+            {
+                foreach (Window w in Application.Current.Windows)
+                {
+                    if (w.Name == window)
+                    {
+                        w.Close();
+                    }
+                }
+            }
+            UserManagement.Logout(UsersListVI, AccListVI, SettingsListVI, accList, tabControl, s_masterPassCheckTimer!);
+            UserLogoutTimersStop();
+        }
+
+        private void Passenger_Closing(object sender, CancelEventArgs e)
+        {
+            ClipBoardUtil.ClearClipboard(Globals.accountPassword!);
+            Globals.accountPassword = string.Empty;
+        }
     }
 }

@@ -7,9 +7,6 @@ using Passenger.Utils;
 
 namespace Passenger
 {
-    /// <summary>
-    /// Логика взаимодействия для Window1.xaml
-    /// </summary>
     public partial class AddUser : Window
     {
         DispatcherTimer dispatcherTimer = new DispatcherTimer();
@@ -41,10 +38,10 @@ namespace Passenger
         private void saveBTN_Click(object sender, RoutedEventArgs e)
         {
             UserManagement.CreateUser(vaultNameTXT.Text, addVPassword.Password, confirmVPassword.Password);
-            if (PassengerLib.Globals.vaultChecks)
+            if (PassengerLib.Globals.userChecks)
             {
                 TextPassBoxChanges.ClearPBoxesInput(addVPassword, confirmVPassword);
-                PassengerLib.Globals.vaultChecks = false;
+                PassengerLib.Globals.userChecks = false;
             }
             else
             {
@@ -85,7 +82,7 @@ namespace Passenger
 
         private void StartHashLabelClean()
         {
-            dispatcherTimer.Tick += dispatcherTimer_Tick;
+            dispatcherTimer.Tick += dispatcherTimer_Tick!;
             dispatcherTimer.Interval = new TimeSpan(0, 0, 2);
             dispatcherTimer.Start();
         }

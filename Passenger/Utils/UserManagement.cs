@@ -21,21 +21,21 @@ namespace Passenger.Utils
                 if (Database.isUserExists(userName))
                 {
                     Notification.ShowNotificationInfo("orange", "User with this name already exist!");
-                    PassengerLib.Globals.vaultChecks = true;
+                    PassengerLib.Globals.userChecks = true;
                     return;
                 }
 
                 if (userName.Length < 3)
                 {
                     Notification.ShowNotificationInfo("orange", "User name must be at least 3 characters long.");
-                    PassengerLib.Globals.vaultChecks = true;
+                    PassengerLib.Globals.userChecks = true;
                     return;
                 }
 
                 if (!PasswordValidator.ValidatePassword(confirmPassword))
                 {
                     Notification.ShowNotificationInfo("orange", "Password must be at least 12 characters, and must include at least one upper case letter, one lower case letter, one numeric digit, one special character and no space!");
-                    PassengerLib.Globals.vaultChecks = true;
+                    PassengerLib.Globals.userChecks = true;
                     return;
                 }
 
@@ -68,7 +68,7 @@ namespace Passenger.Utils
         public static void DeleteUserItem(ListView listView)
         {
             string userName = ((User)listView.SelectedItem).Name!;
-            PassengerLib.Globals.vaultName = userName;
+            PassengerLib.Globals.userName = userName;
 
             DeleteUser deleteUser = new DeleteUser();
             deleteUser.ShowDialog();
@@ -96,16 +96,10 @@ namespace Passenger.Utils
 
         public static void ListUsers(ListView listView)
         {
-            PassengerLib.Globals.vaultsCount = 0;
             listView.ItemsSource = null;
 
             var usersList = Database.GetUserList();
             listView.ItemsSource = usersList;
-            //foreach (var user in usersList)
-            //{
-            //    PassengerLib.Globals.vaultsCount++;
-            //    listView.Items.Add(new { Name = user.Name, DateCreated = user.DateCreated });
-            //}
         }
 
         public static void Logout(ListViewItem userListView, ListViewItem accountListView, ListViewItem settingsListView,
@@ -123,7 +117,7 @@ namespace Passenger.Utils
             Globals.masterPassword = null;
             Globals.vaultOpen = false;
             
-            //MasterPasswordTimerStart.MasterPasswordCheck_TimerStop(masterPasswordTimer);
+            MasterPasswordTimerStart.MasterPasswordCheck_TimerStop(masterPasswordTimer);
             GC.Collect();
         }
 
@@ -148,7 +142,7 @@ namespace Passenger.Utils
             int id = Database.GetUserID(userName);
             List<Account> accounts = Database.GetAccountsList(id);
             accounts[0].IsPasswordVisible = true;
-            if (AES.Decrypt(accounts[0].Password, oldMasterPassword).Contains("Error decrypting"))
+            if (AES.Decrypt(accounts[0].Password!, oldMasterPassword).Contains("Error decrypting"))
             {
                 Notification.ShowNotificationInfo("red", "Incorrect master password!");
                 return;
@@ -160,17 +154,6 @@ namespace Passenger.Utils
                 account.Password = AES.Encrypt(account.Password!, newMasterPassword);
                 Database.UpdateAccount(account, account.Password);
             }
-            //if (accounts[0].Password!.Contains("Error decrypting"))
-            //{
-            //    Notification.ShowNotificationInfo("red", "Incorrect master password!");
-            //    return;
-            //}
-
-            //foreach (var account in accounts)
-            //{
-            //    account.Password = AES.Encrypt(account.Password!, newMasterPassword);
-            //    Database.UpdateAccount(account, account.Password);
-            //}
             Database.UpdateUsersPassword(userName, PassengerLib.Globals.newMasterPassword!);
                         
             Notification.ShowNotificationInfo("green", $"New Master Password was set for user {userName}!");

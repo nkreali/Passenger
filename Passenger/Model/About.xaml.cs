@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Reflection.Metadata;
 using System.Text;
 using System.Threading.Tasks;
 using System.Windows;
@@ -22,6 +23,12 @@ namespace Passenger
         public About()
         {
             InitializeComponent();
+            assemblyNameLBL.Content = $"Name: Passenger";
+            versionNameLBL.Content = $"Version: 1.0";
+            copyRightLBL.Content = $"© 2025";
+            descriptionTXT.Text = $"Simple offline password manager for local storage of sensitive data. " +
+                                  $"It uses SQLite DBMS to store user data, AES-256 for encryption and " +
+                                  $"Argon2id for storing user password hash.\r\nMade by nkreali.";
         }
         private void Window_MouseDown(object sender, MouseButtonEventArgs e)
         {

@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Microsoft.Win32;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -12,7 +13,7 @@ using System.Windows.Media;
 using System.Windows.Media.Imaging;
 using System.Windows.Shapes;
 
-namespace Passenger.Model
+namespace Passenger
 {
     /// <summary>
     /// Логика взаимодействия для UpdatePassNotification.xaml
@@ -22,6 +23,19 @@ namespace Passenger.Model
         public UpdatePassNotification()
         {
             InitializeComponent();
+            string account = PassengerLib.Globals.accountName!; 
+            notificationLBL.Text = $"Do you want tot update password for {account} account?";
         }
+        private void confirmBTN_Click(object sender, RoutedEventArgs e)
+        {
+            PassengerLib.Globals.updatePwdConfirmation = true;
+            this.Close();
+        }
+        private void CancelBTN_Click(object sender, RoutedEventArgs e)
+        {
+            PassengerLib.Globals.updatePwdConfirmation = false;
+            this.Close();
+        }
+
     }
 }

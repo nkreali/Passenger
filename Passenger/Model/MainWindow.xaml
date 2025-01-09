@@ -11,7 +11,7 @@
         Title="Passenger - Password Manager"
         Height="700" Width="1200" ResizeMode="CanMinimize" WindowStartupLocation="CenterScreen" 
         Visibility="Visible" MouseDown="Passenger_MouseDown" 
-        Background="Transparent" WindowStyle="None">
+        Background="Transparent" WindowStyle="None" Closing="Passenger_Closing">
     <!-- Icon="pack://application:,,,/Resources/Logo.ico"-->
     <Border BorderThickness="1,1,1,1" Background="White" BorderBrush="#690fc2">
         <Grid RenderTransformOrigin="0.819,0.497" Margin="0,0,0,0" Background="#f3f5f2">
@@ -90,8 +90,8 @@
                         <Button Name="LogoutLBL" BorderThickness="0" Style="{DynamicResource LogoutButton}" Content="Logout" Background="#f3f5f2" HorizontalAlignment="Left" Margin="411,628,0,0" VerticalAlignment="Top" FontSize="16" RenderTransformOrigin="4.157,15.948" FontWeight="Bold" Click="LogoutLBL_Click" Width="80" Height="26"/>
                         <materialDesign:PackIcon Kind="Logout" Name="logoutIconV" Margin="384,626,0,0" Width="31" Height="30" Foreground="Red" RenderTransformOrigin="1.547,0.52"/>
                         <materialDesign:PackIcon Name="AddAppIcon" ToolTip="Add Application" Foreground="#690fc2" Kind="Plus" Margin="48,588,0,0" Width="25" Height="26" RenderTransformOrigin="0.556,-0.722" FontWeight="Bold" PreviewMouseDown="AddAppIcon_PreviewMouseDown"/>
-                        <materialDesign:PackIcon x:Name="DelApp" ToolTip="Delete Application" Foreground="#690fc2" Kind="Minus" Margin="78,588,0,0" Width="25" Height="26" RenderTransformOrigin="0.556,-0.722" PreviewMouseDown="DelAppIcon_PreviewMouseDown"/>
-                        <ListView Name="accList"  GridViewColumnHeader.Click="AppListColumnHeaderClickedHandler" HorizontalAlignment="Left" ScrollViewer.HorizontalScrollBarVisibility="Disabled" Height="508" VerticalAlignment="Top" Width="885" Background="#f3f5f2" Foreground="#0d0300" FontSize="14" SelectionMode="Single" SelectionChanged="accList_SelectionChanged" Margin="36,80,0,0">
+                        <materialDesign:PackIcon x:Name="DelAcc" ToolTip="Delete Application" Foreground="#690fc2" Kind="Minus" Margin="78,588,0,0" Width="25" Height="26" RenderTransformOrigin="0.556,-0.722" PreviewMouseDown="DelAccIcon_PreviewMouseDown"/>
+                        <ListView Name="accList" GridViewColumnHeader.Click="AccListColumnHeaderClickedHandler" HorizontalAlignment="Left" ScrollViewer.HorizontalScrollBarVisibility="Disabled" Height="508" VerticalAlignment="Top" Width="885" Background="#f3f5f2" Foreground="#0d0300" FontSize="14" SelectionMode="Single" Margin="36,80,0,0">
                             <ListView.ItemContainerStyle>
                                 <Style TargetType="{x:Type ListViewItem}">
                                     <Setter Property="Template">

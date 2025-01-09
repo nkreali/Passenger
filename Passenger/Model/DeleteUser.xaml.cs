@@ -23,7 +23,7 @@ namespace Passenger
         public DeleteUser()
         {
             InitializeComponent();
-            string userName = PassengerLib.Globals.vaultName!;
+            string userName = PassengerLib.Globals.userName!;
             notificationLBL.Text = $"Do you want tot delete/remove {userName} user?";
         }
 

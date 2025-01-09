@@ -19,7 +19,7 @@ namespace Passenger.Utils
     {
         private static readonly string DefaultPath = @".\data.db";
 
-        public static void InitializeTables() // здесь все готово
+        public static void InitializeTables()
         {
             try
             {
@@ -235,6 +235,48 @@ namespace Passenger.Utils
             }
         }
 
+        public static Account GetAccount(int ownerId, string login, string service)
+        {
+            try
+            {
+                using (var connection = new SQLiteConnection($"Data source ={DefaultPath}"))
+                {
+                    connection.Open();
+
+                    SQLiteCommand command = new SQLiteCommand(connection);
+                    command.CommandText = "SELECT Id, OwnerId, Service, Login, Password, DateCreated, DateModified " +
+                                          "FROM Accounts WHERE OwnerId = @OwnerId AND Login = @Login AND Service = @Service";
+                    command.Parameters.AddWithValue("@OwnerId", ownerId);
+                    command.Parameters.AddWithValue("@Login", login);
+                    command.Parameters.AddWithValue("@Service", service);
+
+
+                    using var reader = command.ExecuteReader();
+                    if (reader.Read())
+                    {
+                        return new Account
+                        {
+                            Id = reader.GetInt32(reader.GetOrdinal("Id")),
+                            Owner_Id = reader.GetInt32(reader.GetOrdinal("OwnerId")),
+                            Service = reader.GetString(reader.GetOrdinal("Service")),
+                            Login = reader.GetString(reader.GetOrdinal("Login")),
+                            Password = reader.GetString(reader.GetOrdinal("Password")),
+                            DateCreated = reader.GetDateTime(reader.GetOrdinal("DateCreated")),
+                            DateModified = reader.GetDateTime(reader.GetOrdinal("DateModified"))
+                        };
+                    }
+
+                    connection.Close();
+                }
+            }
+            catch (Exception ex)
+            {
+                Notification.ShowNotificationInfo("red", ex.Message);
+            }
+
+            return null;
+        }
+
         public static List<Account> GetAccountsList(int ownerId)
         {
             List<Account> accounts = new List<Account>();
@@ -342,7 +384,7 @@ namespace Passenger.Utils
                     connection.Open();
 
                     SQLiteCommand command = new SQLiteCommand(connection);
-                    command.CommandText = "DELETE FROM Accounts WHERE Id = @Id)";
+                    command.CommandText = "DELETE FROM Accounts WHERE Id = @Id";
                     command.Parameters.AddWithValue("@Id", account.Id);
 
                     command.ExecuteNonQuery();
@@ -367,7 +409,10 @@ namespace Passenger.Utils
                                           "DateModified = @NewDateModified " +
                                           "WHERE Id = @Id";
                     command.Parameters.AddWithValue("@NewPassword", newPassword);
-                    command.Parameters.AddWithValue("@NewDateModified", DateTime.Now);
+                    if (account.Password != newPassword)
+                        command.Parameters.AddWithValue("@NewDateModified", DateTime.Now);
+                    else
+                        command.Parameters.AddWithValue("@NewDateModified", account.DateModified);
                     command.Parameters.AddWithValue("@Id", account.Id);
 
                     command.ExecuteNonQuery();

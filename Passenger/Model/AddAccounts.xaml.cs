@@ -17,9 +17,6 @@ using System.Windows.Shapes;
 
 namespace Passenger
 {
-    /// <summary>
-    /// Логика взаимодействия для AddAccounts.xaml
-    /// </summary>
     public partial class AddAccounts : Window
     {
         public AddAccounts()
@@ -28,7 +25,7 @@ namespace Passenger
         }
         private void addAppBTN_Click(object sender, RoutedEventArgs e)
         {
-            PassengerLib.Globals.applicationName = appNameTXT.Text;
+            PassengerLib.Globals.serviceName = appNameTXT.Text;
             PassengerLib.Globals.accountName = accountNameTXT.Text;
             PassengerLib.Globals.accountPassword = accPasswordBox.Password;
             PassengerLib.Globals.closeAppConfirmation = false;

@@ -8,7 +8,7 @@ namespace Passenger.Utils
         public static SecureString LoadMasterPassword(string userName)
         {
             SecureString password;
-            PassengerLib.Globals.vaultName = userName;
+            PassengerLib.Globals.userName = userName;
             MasterPassword masterPassword = new MasterPassword();
             masterPassword.ShowDialog();
             password = masterPassword.masterPassword!;

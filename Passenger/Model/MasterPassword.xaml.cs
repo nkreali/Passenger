@@ -17,16 +17,13 @@ using Passenger.Utils;
 
 namespace Passenger
 {
-    /// <summary>
-    /// Логика взаимодействия для MasterPassword.xaml
-    /// </summary>
     public partial class MasterPassword : Window
     {
         public SecureString? masterPassword;
         public MasterPassword()
         {
             InitializeComponent();
-            vaultNameLBL.Text = Globals.vaultName;
+            vaultNameLBL.Text = Globals.userName;
 
         }
         private void Window_MouseDown(object sender, MouseButtonEventArgs e)
@@ -48,7 +45,7 @@ namespace Passenger
             }
             
             Globals.masterPasswordCheck = true;
-            //MasterPasswordTimerStart.MasterPasswordCheck_TimerStart(MainWindow.s_masterPassCheckTimer);
+            MasterPasswordTimerStart.MasterPasswordCheck_TimerStart(MainWindow.s_masterPassCheckTimer!);
             masterPassword = masterPasswordPWD.SecurePassword;
             this.Close();
         }

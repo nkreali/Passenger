@@ -7,7 +7,7 @@ using System.Threading.Tasks;
 
 namespace Passenger.Utils
 {
-    public class Account : INotifyPropertyChanged // нужно будет прикрутить поддержку ObservableCollection в ListView
+    public class Account : INotifyPropertyChanged 
     {
         private string? _password;
         private bool _isPasswordVisible;
@@ -32,7 +32,7 @@ namespace Passenger.Utils
             set
             {
                 _isPasswordVisible = value;
-                OnPropertyChanged(nameof(Password)); // Уведомляем об изменении Password
+                OnPropertyChanged(nameof(Password));
             }
         }
         public event PropertyChangedEventHandler? PropertyChanged;

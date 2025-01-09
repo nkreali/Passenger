@@ -8,6 +8,7 @@ using PassengerLib;
 using System.Windows.Controls;
 using System.Text.Json;
 using System.Security.Principal;
+using System.IO;
 
 namespace Passenger.Utils
 {
@@ -19,7 +20,7 @@ namespace Passenger.Utils
         {
             try
             {
-                listView.Items.Clear();
+                listView.ItemsSource = null;
 
                 if (!Database.isUserExists(userName))
                 {
@@ -42,18 +43,10 @@ namespace Passenger.Utils
                     {
                         Notification.ShowNotificationInfo("red", "Incorrect master password!");
                         Globals.masterPasswordCheck = false;
-                        //MasterPasswordTimerStart.MasterPasswordCheck_TimerStop(MainWindow.s_masterPassCheckTimer);
+                        MasterPasswordTimerStart.MasterPasswordCheck_TimerStop(MainWindow.s_masterPassCheckTimer!);
                         return false;
                     }
                     account.IsPasswordVisible = false;
-                    //listView.Items.Add(new
-                    //{
-                    //    Service = account.Service,
-                    //    Login = account.Login,
-                    //    Password = passMask,
-                    //    DateCreated = account.DateCreated,
-                    //    DateModified = account.DateModified
-                    //});
 
                 }
                 listView.ItemsSource = list;
@@ -97,19 +90,23 @@ namespace Passenger.Utils
                 return;
             }
 
-            /*string decryptVault = AES.Decrypt(readVault, PasswordValidator.ConvertSecureStringToString(masterPassword));
-            if (decryptVault.Contains("Error decrypting"))
-            {
-                Notification.ShowNotificationInfo("red", "Something went wrong. Master password is incorrect or vault issue!");
-                PwMLib.GlobalVariables.masterPasswordCheck = false;
-                MasterPasswordTimerStart.MasterPasswordCheck_TimerStop(MainWindow.s_masterPassCheckTimer);
-                return;
-            }*/
             if (login.Length < 3)
             {
                 Notification.ShowNotificationInfo("orange", "The length of login should be at least 3 characters!");
                 return;
             }
+
+            var test_acc = Database.GetAccountsList(account.Owner_Id)[0];
+            test_acc.IsPasswordVisible = true;
+            test_acc.Password = AES.Decrypt(test_acc.Password!, PasswordValidator.ConvertSecureStringToString(masterPassword));
+            if (test_acc.Password.Contains("Error decrypting"))
+            {
+                Notification.ShowNotificationInfo("red", "Incorrect master password!");
+                PassengerLib.Globals.masterPasswordCheck = false;
+                MasterPasswordTimerStart.MasterPasswordCheck_TimerStop(MainWindow.s_masterPassCheckTimer!);
+                return;
+            }
+
             account.IsPasswordVisible = true;
             account.Password = AES.Encrypt(account.Password, PasswordValidator.ConvertSecureStringToString(masterPassword));
             if (Database.isUserExists(userName))
@@ -119,6 +116,7 @@ namespace Passenger.Utils
                     Database.AddAccount(account.Owner_Id, account);
                     Notification.ShowNotificationInfo("green", $"Data for {service} is encrypted and added to vault!");
                     account.IsPasswordVisible = false;
+                    DecryptAndPopulateList(listView, userName, masterPassword);
                     return;
                 }
                 catch (Exception ex)
@@ -132,23 +130,141 @@ namespace Passenger.Utils
                 ListViewSettings.ListViewSortSetting(listView, "site/application", false);
             }
             account.IsPasswordVisible = false;
+            listView.ItemsSource = null;
+            DecryptAndPopulateList(listView, userName, masterPassword);
         }
 
-        public static void AddAccsToTempList(ListView listView)
-        {
-            PassengerLib.Globals.listItems.Clear();
-            for (int i = 0; i <= listView.Items.Count - 1; i++)
-                PassengerLib.Globals.listItems.Add(listView.Items[i].ToString()!);
-        }
         public static void UpdateAccount(ListView listView, string userName, string service,
                                 string login, string accountPassword, SecureString masterPassword)
         {
+            if (masterPassword == null)
+            {
+                ClearVariables.VariablesClear();
+                return;
+            }
+            if (!Database.isUserExists(userName))
+            {
+                Notification.ShowNotificationInfo("red", $"User {userName} does not exist!");
+                return;
+            }
 
+            Account acc = Database.GetAccount(Database.GetUserID(userName), login, service);
+            if (acc == null)
+            {
+                Notification.ShowNotificationInfo("orange", $"This account does not exist!");
+                return;
+            }
+            acc.IsPasswordVisible = true;
+            acc.Password = AES.Decrypt(acc.Password!, PasswordValidator.ConvertSecureStringToString(masterPassword));
+            if (acc.Password.Contains("Error decrypting"))
+            {
+                Notification.ShowNotificationInfo("red", "Incorrect master password!");
+                PassengerLib.Globals.masterPasswordCheck = false;
+                MasterPasswordTimerStart.MasterPasswordCheck_TimerStop(MainWindow.s_masterPassCheckTimer!);
+                return;
+            }
+
+            if (Database.isUserExists(userName))
+            {
+                try
+                {
+                    accountPassword = AES.Encrypt(accountPassword, PasswordValidator.ConvertSecureStringToString(masterPassword));
+                    Database.UpdateAccount(acc, accountPassword);
+                    Notification.ShowNotificationInfo("green", $"Password for account {acc.Login} for {acc.Service} was updated!");
+                    DecryptAndPopulateList(listView, userName, masterPassword);
+                    return;
+                }
+                catch (Exception ex)
+                {
+                    Notification.ShowNotificationInfo("red", ex.Message);
+                }
+            }
+            else
+            {
+                Notification.ShowNotificationInfo("red", $"User {userName} does not exist!");
+                ListViewSettings.ListViewSortSetting(listView, "site/application", false);
+            }
+            DecryptAndPopulateList(listView, userName, masterPassword);
+        }
+        public static void UpdateSelectedItemPassword(ListView listView, string userName)
+        {
+            Account acc = (Account)listView.SelectedItem;
+            if (acc != null)
+            {
+                acc.IsPasswordVisible = true;
+                string? service = acc.Service;
+                string? login = acc.Login;
+                PassengerLib.Globals.accountName = login;
+                PassengerLib.Globals.serviceName = service;
+                UpdateAccount updateAcc = new UpdateAccount();
+                updateAcc.ShowDialog();
+                string? newPassword = PassengerLib.Globals.newAccountPassword;
+                if (!string.IsNullOrEmpty(newPassword))
+                {
+                    if (!PassengerLib.Globals.masterPasswordCheck)
+                    {
+                        var masterPassword = MasterPasswordLoad.LoadMasterPassword(userName);
+                        UpdateAccount(listView, userName, service!, login!, newPassword, masterPassword);
+                        ClearVariables.VariablesClear();
+                        return;
+                    }
+                    UpdateAccount(listView, userName, service!, login!, newPassword, PassengerLib.Globals.masterPassword!);
+                    ClearVariables.VariablesClear();
+                }
+            }
+            ListViewSettings.ListViewSortSetting(listView, "site/application", false);
         }
         public static void DeleteAccount(ListView listView, string userName, string service,
                                         string login, SecureString masterPassword)
-        {
+        {            
+            if (masterPassword == null)
+            {
+                ClearVariables.VariablesClear();
+                return;
+            }
+            if (!Database.isUserExists(userName))
+            {
+                Notification.ShowNotificationInfo("red", $"User {userName} does not exist!");
+                return;
+            }
 
+            Account acc = Database.GetAccount(Database.GetUserID(userName), login, service);
+            if (acc == null)
+            {
+                Notification.ShowNotificationInfo("orange", $"This account does not exist!");
+                return;
+            }
+            acc.IsPasswordVisible = true;
+            acc.Password = AES.Decrypt(acc.Password!, PasswordValidator.ConvertSecureStringToString(masterPassword));
+            if (acc.Password.Contains("Error decrypting"))
+            {
+                Notification.ShowNotificationInfo("red", "Incorrect master password!");
+                PassengerLib.Globals.masterPasswordCheck = false;
+                MasterPasswordTimerStart.MasterPasswordCheck_TimerStop(MainWindow.s_masterPassCheckTimer!);
+                return;
+            }
+
+            if (Database.isUserExists(userName))
+            {
+                try
+                {
+                    Database.DeleteAccount(acc);
+                    Notification.ShowNotificationInfo("green", $"Account {acc.Login} for {acc.Service} was deleted!");
+                    DecryptAndPopulateList(listView, userName, masterPassword);
+                    return;
+                }
+                catch (Exception ex)
+                {
+                    Notification.ShowNotificationInfo("red", ex.Message);
+                }
+            }
+            else
+            {
+                Notification.ShowNotificationInfo("red", $"User {userName} does not exist!");
+                ListViewSettings.ListViewSortSetting(listView, "site/application", false);
+            }
+            listView.ItemsSource = null;
+            DecryptAndPopulateList(listView, userName, masterPassword);
         }
 
 
@@ -186,7 +302,35 @@ namespace Passenger.Utils
             
             return outPass;
         }
+        public static void DeleteSelectedItem(ListView listView, string userName, ListView userList)
+        {
 
+            Account account = (Account)listView.SelectedItem;
+            if (account != null)
+            {
+                PassengerLib.Globals.accountName = account.Login;
+                PassengerLib.Globals.serviceName = account.Service;
+                DeleteAccount delAcc = new DeleteAccount();
+                delAcc.ShowDialog();
+                if (PassengerLib.Globals.deleteConfirmation)
+                {
+                    if (!PassengerLib.Globals.masterPasswordCheck)
+                    {
+                        var masterPassword = MasterPasswordLoad.LoadMasterPassword(userName);
+                        DeleteAccount(listView, userName, account.Service!, account.Login!, masterPassword);
+                        ClearVariables.VariablesClear();
+                        return;
+                    }
+                    DeleteAccount(listView, userName, account.Service!, account.Login!, PassengerLib.Globals.masterPassword!);
+                    ClearVariables.VariablesClear();
+                }
+            }
+            else
+            {
+                Notification.ShowNotificationInfo("orange", "You must select an application to delete!");
+            }
+            ListViewSettings.ListViewSortSetting(listView, "site/application", false);
+        }
     } 
 }
 

@@ -23,7 +23,7 @@ namespace Passenger
         public MasterPasswordChange()
         {
             InitializeComponent();
-            vaultNameTB.Text = PassengerLib.Globals.vaultName;
+            vaultNameTB.Text = PassengerLib.Globals.userName;
             PassengerLib.Globals.closeAppConfirmation = false;
         }
 
